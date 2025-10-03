@@ -2,45 +2,57 @@ package algorithms;
 
 import metrics.PerformanceTracker;
 
-@SuppressWarnings("ClassCanBeRecord")
-public class HeapSort {
+public final class HeapSort {
     private final PerformanceTracker tracker;
 
     public HeapSort(PerformanceTracker tracker) {
+        if (tracker == null) throw new IllegalArgumentException("tracker is null");
         this.tracker = tracker;
     }
 
     public void sort(int[] a) {
         if (a == null) throw new IllegalArgumentException("array is null");
-        if (a.length < 2) return;
+        int size = a.length;
+        if (size < 2) return;
 
-        buildMaxHeap(a);
-        for (int end = a.length - 1; end > 0; end--) {
+        buildMaxHeap(a, size);
+
+        for (int end = size - 1; end > 0; end--) {
             swap(a, 0, end);
             siftDownFrom(a, 0, end);
         }
     }
 
-    private void buildMaxHeap(int[] a) {
-        for (int i = (a.length >>> 1) - 1; i >= 0; i--) {
-            siftDownFrom(a, i, a.length);
+    private void buildMaxHeap(int[] a, int size) {
+        for (int i = (size >>> 1) - 1; i >= 0; i--) {
+            siftDownFrom(a, i, size);
         }
     }
 
     private void siftDownFrom(int[] a, int i, int size) {
+        int v = read(a, i);
         while (true) {
             int left = (i << 1) + 1;
-            if (left >= size) return;
+            if (left >= size) break;
+
+            int c = left;
+            int cv = read(a, c);
 
             int right = left + 1;
-            int largest = left;
-            if (right < size && cmp(read(a, right), read(a, left)) > 0) largest = right;
+            if (right < size) {
+                int rv = read(a, right);
+                if (cmp(rv, cv) > 0) {
+                    c = right;
+                    cv = rv;
+                }
+            }
 
-            if (cmp(read(a, largest), read(a, i)) <= 0) return;
+            if (cmp(cv, v) <= 0) break;
 
-            swap(a, i, largest);
-            i = largest;
+            write(a, i, cv);
+            i = c;
         }
+        write(a, i, v);
     }
 
     private int cmp(int u, int v) {
